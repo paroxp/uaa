@@ -79,6 +79,7 @@ public class UaaSavedRequestCache extends HttpSessionRequestCache implements Fil
         }
     }
 
+    // TODO: This may be interesting
     public void saveClientRedirect(HttpServletRequest request, String redirectUrl) {
         HttpSession session = request.getSession(true);
         session.setAttribute(SAVED_REQUEST_SESSION_ATTRIBUTE, new ClientRedirectSavedRequest(request, redirectUrl));

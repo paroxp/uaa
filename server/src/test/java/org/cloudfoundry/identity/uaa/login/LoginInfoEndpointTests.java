@@ -836,14 +836,16 @@ class LoginInfoEndpointTests {
         assertEquals(2, endpoint.getOauthIdentityProviderDefinitions(null).size());
     }
 
+    // TODO: This test calls login/callback
     @Test
     void xoauthCallback_redirectsToHomeIfNoSavedRequest() {
         LoginInfoEndpoint endpoint = getEndpoint(IdentityZoneHolder.get());
         HttpSession session = new MockHttpSession();
-        String redirectUrl = endpoint.handleXOAuthCallback(session);
+        String redirectUrl = endpoint.handleXOAuthCallback(session, null, null);
         assertEquals("redirect:/home", redirectUrl);
     }
 
+    // TODO: This test calls login/callback
     @Test
     void xoauthCallback_redirectsToSavedRequestIfPresent() {
         LoginInfoEndpoint endpoint = getEndpoint(IdentityZoneHolder.get());
@@ -851,7 +853,7 @@ class LoginInfoEndpointTests {
         DefaultSavedRequest savedRequest = mock(DefaultSavedRequest.class);
         when(savedRequest.getRedirectUrl()).thenReturn("/some.redirect.url");
         session.setAttribute(SAVED_REQUEST_SESSION_ATTRIBUTE, savedRequest);
-        String redirectUrl = endpoint.handleXOAuthCallback(session);
+        String redirectUrl = endpoint.handleXOAuthCallback(session, null, null);
         assertEquals("redirect:/some.redirect.url", redirectUrl);
     }
 

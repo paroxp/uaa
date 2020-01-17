@@ -396,7 +396,8 @@ public class LoginInfoEndpoint {
                                 xoAuthProviderConfigurator.getCompleteAuthorizationURI(
                                         e.getKey(),
                                         UaaUrlUtils.getBaseURL(request),
-                                        e.getValue()),
+                                        e.getValue(),
+                                        request),
                                 e.getValue().getLinkText()
                         )
                 );
@@ -549,7 +550,7 @@ public class LoginInfoEndpoint {
     }
 
     private String getRedirectUrlForXOAuthIDP(HttpServletRequest request, String alias, AbstractXOAuthIdentityProviderDefinition definition) {
-        return xoAuthProviderConfigurator.getCompleteAuthorizationURI(alias, UaaUrlUtils.getBaseURL(request), definition);
+        return xoAuthProviderConfigurator.getCompleteAuthorizationURI(alias, UaaUrlUtils.getBaseURL(request), definition, request);
     }
 
     private Map<String, SamlIdentityProviderDefinition> getSamlIdentityProviderDefinitions(List<String> allowedIdps) {
@@ -813,7 +814,18 @@ public class LoginInfoEndpoint {
     }
 
     @RequestMapping(value = "/login/callback/{origin}")
-    public String handleXOAuthCallback(final HttpSession session) {
+    public String handleXOAuthCallback(
+            final HttpSession session,
+            final HttpServletRequest request,
+            final @PathVariable("origin") String origin) {
+
+        final var stateFromRequest = request.getParameter("state");
+        final var stateFromSession = session.getAttribute("xoauth-state-" + origin);
+
+        if(StringUtils.isEmpty(stateFromSession) || !stateFromSession.equals(stateFromRequest)) {
+            throw new RuntimeException("you is wrong");
+        }
+
         String redirectLocation = "/home";
         SavedRequest savedRequest = (SavedRequest) session.getAttribute(SAVED_REQUEST_SESSION_ATTRIBUTE);
         if (savedRequest != null && savedRequest.getRedirectUrl() != null) {

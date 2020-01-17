@@ -183,6 +183,7 @@ public class InvitationsController {
         }
     }
 
+    // TODO: This appears to be the place to set the state param
     private void setRequestAttributes(HttpServletRequest request, String newCode, UaaUser user) {
         RequestContextHolder.getRequestAttributes().setAttribute("IS_INVITE_ACCEPTANCE", true, RequestAttributes.SCOPE_SESSION);
         RequestContextHolder.getRequestAttributes().setAttribute("user_id", user.getId(), RequestAttributes.SCOPE_SESSION);

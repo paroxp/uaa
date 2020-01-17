@@ -4,12 +4,15 @@ import org.cloudfoundry.identity.uaa.provider.AbstractXOAuthIdentityProviderDefi
 import org.cloudfoundry.identity.uaa.provider.IdentityProvider;
 import org.cloudfoundry.identity.uaa.provider.IdentityProviderProvisioning;
 import org.cloudfoundry.identity.uaa.provider.OIDCIdentityProviderDefinition;
+import org.cloudfoundry.identity.uaa.util.SessionUtils;
 import org.cloudfoundry.identity.uaa.util.UaaRandomStringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -51,7 +54,8 @@ public class XOAuthProviderConfigurator implements IdentityProviderProvisioning 
     public String getCompleteAuthorizationURI(
             final String alias,
             final String baseURL,
-            final AbstractXOAuthIdentityProviderDefinition definition) {
+            final AbstractXOAuthIdentityProviderDefinition definition,
+            final HttpServletRequest request) {
         String authUrlBase;
         if (definition instanceof OIDCIdentityProviderDefinition) {
             authUrlBase = overlay((OIDCIdentityProviderDefinition) definition).getAuthUrl().toString();
@@ -63,7 +67,11 @@ public class XOAuthProviderConfigurator implements IdentityProviderProvisioning 
         query.add("client_id=" + definition.getRelyingPartyId());
         query.add("response_type=" + URLEncoder.encode(definition.getResponseType(), StandardCharsets.UTF_8));
         query.add("redirect_uri=" + URLEncoder.encode(baseURL + "/login/callback/" + alias, StandardCharsets.UTF_8));
-        query.add("state=" + uaaRandomStringUtil.getSecureRandom(10));
+        final String state = uaaRandomStringUtil.getSecureRandom(10);
+        query.add("state=" + state);
+        if(request != null) {
+            request.getSession().setAttribute("xoauth-state-" + alias, state);
+        }
         if (definition.getScopes() != null && !definition.getScopes().isEmpty()) {
             query.add("scope=" + URLEncoder.encode(String.join(" ", definition.getScopes()), StandardCharsets.UTF_8));
         }

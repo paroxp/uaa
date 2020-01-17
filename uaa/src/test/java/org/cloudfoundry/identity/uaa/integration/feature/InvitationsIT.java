@@ -74,8 +74,8 @@ public class InvitationsIT {
 
     @Rule
     public ScreenshotOnFail screenShootRule = new ScreenshotOnFail();
-    @Rule
-    public RetryRule retryRule = new RetryRule(3);
+//    @Rule
+//    public RetryRule retryRule = new RetryRule(3);
 
     @Autowired
     WebDriver webDriver;
@@ -260,6 +260,18 @@ public class InvitationsIT {
         webDriver.findElement(By.name("password_confirmation"));
     }
 
+    @Test
+    public void xoauthValidatesStateParam() throws Exception {
+        IntegrationTestUtils.createOidcIdentityProvider("oidc-invite-provider", "puppy-invite", baseUrl);
+
+
+        final var fakeState = "fakeState";
+        String authCode;
+
+    }
+
+    // TODO: This test definitely invokes the logic around generating the state param
+    // and it redirects back to `login/callback`
     @Test
     public void invitedOIDCUserVerified() throws Exception {
         String clientId = "invite-client" + new RandomValueStringGenerator().generate();

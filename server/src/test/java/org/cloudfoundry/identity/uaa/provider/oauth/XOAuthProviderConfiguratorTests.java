@@ -214,7 +214,7 @@ class XOAuthProviderConfiguratorTests {
 
     @Test
     void getCompleteAuthorizationURI_includesNonceOnOIDC() {
-        String authzUri = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oidc);
+        String authzUri = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oidc, null);
 
         Map<String, String> queryParams =
                 UriComponentsBuilder.fromUriString(authzUri).build().getQueryParams().toSingleValueMap();
@@ -223,7 +223,7 @@ class XOAuthProviderConfiguratorTests {
 
     @Test
     void getCompleteAuthorizationURI_doesNotIncludeNonceOnOAuth() {
-        String authzUri = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oauth);
+        String authzUri = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oauth, null);
 
         Map<String, String> queryParams =
                 UriComponentsBuilder.fromUriString(authzUri).build().getQueryParams().toSingleValueMap();
@@ -242,7 +242,7 @@ class XOAuthProviderConfiguratorTests {
         }).when(mockOidcMetadataFetcher)
                 .fetchMetadataAndUpdateDefinition(any(OIDCIdentityProviderDefinition.class));
 
-        String authorizationURI = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oidc);
+        String authorizationURI = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oidc, null);
 
         assertThat(authorizationURI, Matchers.startsWith("https://accounts.google.com/o/oauth2/v2/auth"));
         verify(configurator).overlay(oidc);
@@ -252,7 +252,7 @@ class XOAuthProviderConfiguratorTests {
     void getCompleteAuthorizationUri_hasAllRequiredQueryParametersForOidc() {
         when(mockUaaRandomStringUtil.getSecureRandom(10)).thenReturn("random-939b8307");
 
-        String authzUri = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oidc);
+        String authzUri = configurator.getCompleteAuthorizationURI("alias", UAA_BASE_URL, oidc, null);
 
         Map<String, String> queryParams =
                 UriComponentsBuilder.fromUriString(authzUri).build().getQueryParams().toSingleValueMap();
@@ -273,7 +273,8 @@ class XOAuthProviderConfiguratorTests {
         String authzUri = configurator.getCompleteAuthorizationURI(
                 "alias",
                 UAA_BASE_URL,
-                oauth
+                oauth,
+                null
         );
 
         Map<String, String> queryParams =
