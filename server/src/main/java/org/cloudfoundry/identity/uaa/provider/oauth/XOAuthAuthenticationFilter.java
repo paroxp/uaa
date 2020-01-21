@@ -3,10 +3,13 @@ package org.cloudfoundry.identity.uaa.provider.oauth;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.cloudfoundry.identity.uaa.authentication.UaaAuthenticationDetails;
 import org.cloudfoundry.identity.uaa.login.AccountSavingAuthenticationSuccessHandler;
+import org.cloudfoundry.identity.uaa.util.UaaUrlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.csrf.CsrfException;
+import org.springframework.web.HttpSessionRequiredException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -16,6 +19,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -48,6 +52,7 @@ public class XOAuthAuthenticationFilter implements Filter {
             final FilterChain chain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
+        checkRequestStateParameter(request);
 
         if (containsCredentials(request)) {
             if (authenticationWasSuccessful(request, response)) {
@@ -55,6 +60,23 @@ public class XOAuthAuthenticationFilter implements Filter {
             }
         } else {
             request.getRequestDispatcher("/login_implicit").forward(request, response);
+        }
+    }
+
+    // TODO: What if the session attribute is not found?
+    // TODO: What if the session attribute is not a string?
+    // TODO: What if the session attribute is an empty string?
+    private void checkRequestStateParameter(final HttpServletRequest request) throws HttpSessionRequiredException {
+        final String originKey = UaaUrlUtils.extractPathVariableFromUrl(2, request.getPathInfo());
+        final HttpSession session = request.getSession();
+        // TODO: Needs to be a sensible exception?
+        if (session == null) {
+            throw new HttpSessionRequiredException("An HTTP Session is required to process request.");
+        }
+        final String stateInSession = (String)request.getSession().getAttribute("xoauth-state-" + originKey);
+        final String stateFromParameters = request.getParameter("state");
+        if (stateFromParameters.isEmpty() || !stateInSession.equals(stateFromParameters)) {
+            throw new CsrfException("Invalid State Param in request.");
         }
     }
 
