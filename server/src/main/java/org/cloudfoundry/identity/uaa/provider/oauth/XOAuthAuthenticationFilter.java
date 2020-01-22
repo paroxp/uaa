@@ -1,6 +1,7 @@
 package org.cloudfoundry.identity.uaa.provider.oauth;
 
 import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.identity.uaa.authentication.UaaAuthenticationDetails;
 import org.cloudfoundry.identity.uaa.login.AccountSavingAuthenticationSuccessHandler;
 import org.cloudfoundry.identity.uaa.util.UaaUrlUtils;
@@ -52,6 +53,8 @@ public class XOAuthAuthenticationFilter implements Filter {
             final FilterChain chain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+        // TODO: how does / should this relate to the credentials check below?
         checkRequestStateParameter(request);
 
         if (containsCredentials(request)) {
@@ -67,7 +70,7 @@ public class XOAuthAuthenticationFilter implements Filter {
     // TODO: What if the session attribute is not a string?
     // TODO: What if the session attribute is an empty string?
     private void checkRequestStateParameter(final HttpServletRequest request) throws HttpSessionRequiredException {
-        final String originKey = UaaUrlUtils.extractPathVariableFromUrl(2, request.getPathInfo());
+        final String originKey = UaaUrlUtils.extractPathVariableFromUrl(2, request.getServletPath());
         final HttpSession session = request.getSession();
         // TODO: Needs to be a sensible exception?
         if (session == null) {
@@ -75,7 +78,7 @@ public class XOAuthAuthenticationFilter implements Filter {
         }
         final String stateInSession = (String)request.getSession().getAttribute("xoauth-state-" + originKey);
         final String stateFromParameters = request.getParameter("state");
-        if (stateFromParameters.isEmpty() || !stateInSession.equals(stateFromParameters)) {
+        if (StringUtils.isEmpty(stateFromParameters) || !stateInSession.equals(stateFromParameters)) {
             throw new CsrfException("Invalid State Param in request.");
         }
     }

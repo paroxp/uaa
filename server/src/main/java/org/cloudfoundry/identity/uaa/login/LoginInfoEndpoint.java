@@ -54,7 +54,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -842,18 +841,7 @@ public class LoginInfoEndpoint {
     }
 
     @RequestMapping(value = "/login/callback/{origin}")
-    public String handleXOAuthCallback(
-            final HttpSession session,
-            final HttpServletRequest request,
-            final @PathVariable("origin") String origin) {
-
-        final var stateFromRequest = request.getParameter("state");
-        final String stateFromSession = (String)session.getAttribute("xoauth-state-" + origin);
-
-        if(StringUtils.isEmpty(stateFromSession) || !stateFromSession.equals(stateFromRequest)) {
-            throw new RuntimeException("you is wrong");
-        }
-
+    public String handleXOAuthCallback(final HttpSession session) {
         String redirectLocation = "/home";
         SavedRequest savedRequest = (SavedRequest) session.getAttribute(SAVED_REQUEST_SESSION_ATTRIBUTE);
         if (savedRequest != null && savedRequest.getRedirectUrl() != null) {

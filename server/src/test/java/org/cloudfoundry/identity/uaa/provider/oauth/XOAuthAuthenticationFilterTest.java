@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.csrf.CsrfException;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.FilterChain;
@@ -89,9 +90,9 @@ class XOAuthAuthenticationFilterTest {
             when(mockHttpServletRequest.getPathInfo()).thenReturn("login/callback/the_origin");
             when(mockHttpServletRequest.getSession()).thenReturn(mockHttpSession);
             when(mockHttpServletRequest.getParameter(anyString())).thenReturn(null);
-            when(mockHttpServletRequest.getParameter("state")).thenReturn("the_state");
+            Mockito.lenient().when(mockHttpServletRequest.getParameter("state")).thenReturn("the_state");
 
-            when(mockHttpSession.getAttribute("xoauth-state-the_origin")).thenReturn("the_state");
+            Mockito.lenient().when(mockHttpSession.getAttribute("xoauth-state-the_origin")).thenReturn("the_state");
         }
 
         @BeforeEach
@@ -183,6 +184,24 @@ class XOAuthAuthenticationFilterTest {
             FilterChain chain = mock(FilterChain.class);
             MockHttpServletResponse response = new MockHttpServletResponse();
             assertThrows(CsrfException.class, () -> filter.doFilter(mockHttpServletRequest, response, chain));
+        }
+
+        @Test
+        void throwsIfStateParamMissing() {
+            when(mockHttpServletRequest.getParameter("state")).thenReturn(null);
+
+            FilterChain chain = mock(FilterChain.class);
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            assertThrows(CsrfException.class, () -> filter.doFilter(mockHttpServletRequest, response, chain));
+        }
+
+        @Test
+        void throwsIfNoSession() {
+            when(mockHttpServletRequest.getSession()).thenReturn(null);
+
+            FilterChain chain = mock(FilterChain.class);
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            assertThrows(HttpSessionRequiredException.class, () -> filter.doFilter(mockHttpServletRequest, response, chain));
         }
     }
 }

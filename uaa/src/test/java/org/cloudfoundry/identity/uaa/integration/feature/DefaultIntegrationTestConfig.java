@@ -51,7 +51,7 @@ public class DefaultIntegrationTestConfig {
     public ChromeDriver webDriver() {
         System.setProperty("webdriver.chrome.logfile", "/tmp/chromedriver.log");
         System.setProperty("webdriver.chrome.verboseLogging", "true");
-        System.setProperty("webdriver.chrome.driver", "/Users/pivotal/Downloads/chromedriver-v78");
+//        System.setProperty("webdriver.chrome.driver", "/Users/pivotal/Downloads/chromedriver-v78");
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments(

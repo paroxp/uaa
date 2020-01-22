@@ -22,7 +22,6 @@ import org.cloudfoundry.identity.uaa.integration.util.ScreenshotOnFail;
 import org.cloudfoundry.identity.uaa.invitations.InvitationsRequest;
 import org.cloudfoundry.identity.uaa.invitations.InvitationsResponse;
 import org.cloudfoundry.identity.uaa.scim.ScimUser;
-import org.cloudfoundry.identity.uaa.util.RetryRule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -258,16 +257,6 @@ public class InvitationsIT {
         assertThat(webDriver.findElement(By.cssSelector(".alert-error")).getText(), containsString("Password must be no more than 255 characters in length."));
         webDriver.findElement(By.name("password"));
         webDriver.findElement(By.name("password_confirmation"));
-    }
-
-    @Test
-    public void xoauthValidatesStateParam() throws Exception {
-        IntegrationTestUtils.createOidcIdentityProvider("oidc-invite-provider", "puppy-invite", baseUrl);
-
-
-        final var fakeState = "fakeState";
-        String authCode;
-
     }
 
     // TODO: This test definitely invokes the logic around generating the state param

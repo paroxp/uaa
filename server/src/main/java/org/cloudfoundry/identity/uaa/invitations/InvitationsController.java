@@ -145,7 +145,7 @@ public class InvitationsController {
                 String host = request.getHeader("Host");
                 String contextPath = request.getContextPath();
                 String resultPath = scheme + "://" + host + contextPath;
-                String redirect = "redirect:" + definition.getAuthUrl() + "?client_id=" + definition.getRelyingPartyId() + "&response_type=code" + "&redirect_uri=" + resultPath + "/login/callback/" + provider.getOriginKey();
+                String redirect = "redirect:" + definition.getAuthUrl() + "?client_id=" + definition.getRelyingPartyId() + "&response_type=code" + "&state=\"haha\"" + "&redirect_uri=" + resultPath + "/login/callback/" + provider.getOriginKey();
 
                 logger.debug(String.format("Redirecting invitation for email:%s, id:%s OIDC IDP URL:%s", codeData.get("email"), codeData.get("user_id"), redirect));
                 return redirect;
